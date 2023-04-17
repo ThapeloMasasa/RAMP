@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useContext, useEffect, useMemo, useState } from "react"
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react"
 import { InputSelect } from "./components/InputSelect"
 import { Instructions } from "./components/Instructions"
 import { Transactions } from "./components/Transactions"
@@ -15,12 +15,35 @@ export function App() {
   const { data: transactionsByEmployee, ...transactionsByEmployeeUtils } = useTransactionsByEmployee()
   const [isLoading, setIsLoading] = useState(false)
   const [nextPage, setNextPage] = useState(null)
+  const [boxStatus, setCheckBoxValue] = useState([])
 
+   
+  // 👉 Bug 7 fixed
+  const  handleCheckBox= (newValue, id) => {
+    setCheckBoxValue([newValue, id])
+  }
+
+ 
   const transactions = useMemo(
-    () => paginatedTransactions?.data ?? transactionsByEmployee ?? null,
+    () => paginatedTransactions?.data ?? transactionsByEmployee ?? null
+    ,
+
     [paginatedTransactions, transactionsByEmployee]
   )
+
+
+   // 👉 Bug 7 fixed
+  if (transactions!== null) {
    
+   for(let i = 0; i < transactions?.length; i++){
+   
+    if (boxStatus[1] == transactions[i].id){
+      
+      transactions[i].id = boxStatus[1]
+      transactions[i].approved = boxStatus[0]
+    }   
+   }
+  }
 
   const loadAllTransactions = useCallback(async () => {
     setIsLoading(true)
@@ -31,6 +54,7 @@ export function App() {
     await employeeUtils.fetchAll()
     setIsLoading(false)
     await paginatedTransactionsUtils.fetchAll()
+
 
   
   }, [employeeUtils, paginatedTransactionsUtils, transactionsByEmployeeUtils]
@@ -43,6 +67,8 @@ export function App() {
     },
     [paginatedTransactionsUtils, transactionsByEmployeeUtils]
   )
+
+
 //👉 Bug 6 fixed
 useEffect(() => {
   if (paginatedTransactions !== null) {
@@ -54,6 +80,7 @@ useEffect(() => {
       loadAllTransactions()
     }
   }, [employeeUtils.loading, employees, loadAllTransactions])
+  
 
   return (
     <Fragment>
@@ -80,6 +107,7 @@ useEffect(() => {
               return loadAllTransactions() // 👉 Bug 3 fixed
               
             } else {
+              
               await loadTransactionsByEmployee(newValue.id)
               setNextPage(null)
             }
@@ -89,7 +117,7 @@ useEffect(() => {
         <div className="RampBreak--l" />
 
         <div className="RampGrid">
-          <Transactions transactions={transactions} />
+          <Transactions transactions={transactions} onCheckChange = {handleCheckBox} />
 
           {nextPage !== null && (
             <button

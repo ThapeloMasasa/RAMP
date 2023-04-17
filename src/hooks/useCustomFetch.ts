@@ -15,13 +15,13 @@ export function useCustomFetch() {
     ): Promise<TData | null> =>
       wrappedRequest<TData>(async () => {
         const cacheKey = getCacheKey(endpoint, params)
-       console.log("Trying to get cache for ",cacheKey)
+      
         const cacheResponse = cache?.current.get(cacheKey)
-        console.log("Cache response is ",cacheResponse)
+    
         if (cacheResponse !== undefined) {
           
           const data = JSON.parse(cacheResponse)
-          console.log("Returning data from cache ",data)
+         
           return data as Promise<TData>
          
         }
@@ -65,7 +65,7 @@ export function useCustomFetch() {
       }
 
       const cacheKeys = Array.from(cache.current.keys())
-      console.log("here  are the cachekeys",cacheKeys)
+     
       for (const key of cacheKeys) {
         const clearKey = endpointsToClear.some((endpoint) => key.startsWith(endpoint))
 
